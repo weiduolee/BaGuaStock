@@ -45,7 +45,6 @@ CMakeLists.txt.user*
 .vs
 Debug
 GeneratedFiles
-Release
 Win32\Debug
 
 *.idb
