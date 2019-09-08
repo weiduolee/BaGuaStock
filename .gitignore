@@ -41,3 +41,15 @@ target_wrapper.*
 
 # QtCreator CMake
 CMakeLists.txt.user*
+
+.vs
+Debug
+GeneratedFiles
+Release
+Win32\Debug
+
+*.idb
+*.log
+*.pdb
+*.tlog
+*.obj
