@@ -34,6 +34,7 @@ private:
     int m_show = 0;
     int m_filter = 0;
     int m_ST = 0;
+    int m_creation = 0;
     int m_noBuy = 0;
     int m_other = 0;
 

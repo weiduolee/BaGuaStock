@@ -168,6 +168,7 @@ void BaGuaStock::UpdateStats()
     ui.labelShow->setText(QString::number(m_show));
     ui.labelFilter->setText(QString::number(m_filter));
     ui.labelST->setText(QString::number(m_ST));
+    ui.labelST->setText(QString::number(m_creation));
     ui.labelNoBuy->setText(QString::number(m_noBuy));
     ui.labelOther->setText(QString::number(m_other));
 }
@@ -185,12 +186,14 @@ void BaGuaStock::Clear()
     m_show = 0;
     m_filter = 0;
     m_ST = 0;
+    m_creation;
     m_noBuy = 0;
     m_other = 0;
 
     UpdateStats();
 
-    ui.tableWidget->clear();
+    ui.tableWidget->setRowCount(0);
+    ui.tableWidget->setColumnCount(0);
 
     setWindowTitle(QApplication::applicationDisplayName());
 }
@@ -249,6 +252,13 @@ bool BaGuaStock::ParseLine(QString line)
     
     if (data.count() > 6)
     {
+        QString code = data.value(m_codeCol);
+        if (code.startsWith("688", Qt::CaseInsensitive))
+        {
+            m_creation++;
+            return true;
+        }
+
         QString name = data.value(m_nameCol);
         if (name.contains("ST", Qt::CaseInsensitive))
         {
@@ -310,11 +320,11 @@ bool BaGuaStock::ParseLine(QString line)
 
         if (var > 0 && var < 4 )
         {
-            downGua.Rows()[3 - var] = abs(downGua.Rows()[3 - var] - 1);
+            downGua.SetRow((3 - var), abs(downGua.Rows()[3 - var] - 1));
         }
         else
         {
-            topGua.Rows()[6 - var] = abs(topGua.Rows()[6 - var] - 1);
+            topGua.SetRow((6 - var), abs(topGua.Rows()[6 - var] - 1));
         }
 
         int keyRow = FindGua(false, downGua);

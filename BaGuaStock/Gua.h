@@ -20,6 +20,11 @@ public:
         return m_rows;
     }
 
+    void SetRow(int row, int value)
+    {
+        m_rows[row] = value;
+    }
+
     bool operator==(Gua gua)
     {
         if (m_rows.size() == gua.m_rows.size())
