@@ -19,6 +19,7 @@ private slots:
     void openFile();
 
 private:
+    void LoadGuaXiang();
     void LoadGua();
     int FindGua(bool isTop, Gua gua);
     bool LoadKeyFileData();
@@ -46,6 +47,7 @@ private:
     int m_domainCol = -1;
 
     std::vector<std::vector<int>> m_keys;
+    std::vector<std::vector<QString>> m_guaXiang;
     std::vector<Gua> m_topGua;
     std::vector<Gua> m_downGua;
 };

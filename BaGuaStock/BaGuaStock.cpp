@@ -13,6 +13,7 @@ BaGuaStock::BaGuaStock(QWidget *parent)
 
     LoadKeyFileData();
     LoadGua();
+    LoadGuaXiang();
 }
 
 void BaGuaStock::resizeEvent(QResizeEvent *event)
@@ -39,6 +40,97 @@ void BaGuaStock::openFile()
     {
         LoadFileData(filePath);
     }
+}
+
+void BaGuaStock::LoadGuaXiang()
+{
+    std::vector<QString> r1;
+    r1.push_back(QString::fromLocal8Bit("乾为天"));
+    r1.push_back(QString::fromLocal8Bit("泽天夬"));
+    r1.push_back(QString::fromLocal8Bit("火天大有"));
+    r1.push_back(QString::fromLocal8Bit("雷天大壮"));
+    r1.push_back(QString::fromLocal8Bit("风天小畜"));
+    r1.push_back(QString::fromLocal8Bit("水天需"));
+    r1.push_back(QString::fromLocal8Bit("山天大畜"));
+    r1.push_back(QString::fromLocal8Bit("地天泰"));
+    m_guaXiang.push_back(r1);
+
+    std::vector<QString> r2;
+    r2.push_back(QString::fromLocal8Bit("天泽履"));
+    r2.push_back(QString::fromLocal8Bit("兑为泽"));
+    r2.push_back(QString::fromLocal8Bit("火泽睽"));
+    r2.push_back(QString::fromLocal8Bit("雷泽归妹"));
+    r2.push_back(QString::fromLocal8Bit("风泽中孚"));
+    r2.push_back(QString::fromLocal8Bit("水泽节"));
+    r2.push_back(QString::fromLocal8Bit("山泽损"));
+    r2.push_back(QString::fromLocal8Bit("地泽临"));
+    m_guaXiang.push_back(r2);
+
+    std::vector<QString> r3;
+    r3.push_back(QString::fromLocal8Bit("天火同人"));
+    r3.push_back(QString::fromLocal8Bit("泽火革"));
+    r3.push_back(QString::fromLocal8Bit("离为火"));
+    r3.push_back(QString::fromLocal8Bit("雷火丰"));
+    r3.push_back(QString::fromLocal8Bit("风火家人"));
+    r3.push_back(QString::fromLocal8Bit("水火既济"));
+    r3.push_back(QString::fromLocal8Bit("山火贲"));
+    r3.push_back(QString::fromLocal8Bit("地火明夷"));
+    m_guaXiang.push_back(r3);
+
+    std::vector<QString> r4;
+    r4.push_back(QString::fromLocal8Bit("天雷无妄"));
+    r4.push_back(QString::fromLocal8Bit("泽雷随"));
+    r4.push_back(QString::fromLocal8Bit("火雷噬磕"));
+    r4.push_back(QString::fromLocal8Bit("震为雷"));
+    r4.push_back(QString::fromLocal8Bit("风雷益"));
+    r4.push_back(QString::fromLocal8Bit("水雷屯"));
+    r4.push_back(QString::fromLocal8Bit("山雷颐"));
+    r4.push_back(QString::fromLocal8Bit("地雷复"));
+    m_guaXiang.push_back(r4);
+
+    std::vector<QString> r5;
+    r5.push_back(QString::fromLocal8Bit("天风垢"));
+    r5.push_back(QString::fromLocal8Bit("泽风大过"));
+    r5.push_back(QString::fromLocal8Bit("火风鼎"));
+    r5.push_back(QString::fromLocal8Bit("雷风恒"));
+    r5.push_back(QString::fromLocal8Bit("巽为风"));
+    r5.push_back(QString::fromLocal8Bit("水风井"));
+    r5.push_back(QString::fromLocal8Bit("山风蛊"));
+    r5.push_back(QString::fromLocal8Bit("地风升"));
+    m_guaXiang.push_back(r5);
+
+    std::vector<QString> r6;
+    r6.push_back(QString::fromLocal8Bit("天水讼"));
+    r6.push_back(QString::fromLocal8Bit("泽水困"));
+    r6.push_back(QString::fromLocal8Bit("火水未济"));
+    r6.push_back(QString::fromLocal8Bit("雷水解"));
+    r6.push_back(QString::fromLocal8Bit("风水涣"));
+    r6.push_back(QString::fromLocal8Bit("坎为水"));
+    r6.push_back(QString::fromLocal8Bit("山水蒙"));
+    r6.push_back(QString::fromLocal8Bit("地水师"));
+    m_guaXiang.push_back(r6);
+
+    std::vector<QString> r7;
+    r7.push_back(QString::fromLocal8Bit("天山遁"));
+    r7.push_back(QString::fromLocal8Bit("泽山咸"));
+    r7.push_back(QString::fromLocal8Bit("火山旅"));
+    r7.push_back(QString::fromLocal8Bit("雷山小过"));
+    r7.push_back(QString::fromLocal8Bit("风山渐"));
+    r7.push_back(QString::fromLocal8Bit("水山蹇"));
+    r7.push_back(QString::fromLocal8Bit("艮为山"));
+    r7.push_back(QString::fromLocal8Bit("地山谦"));
+    m_guaXiang.push_back(r7);
+
+    std::vector<QString> r8;
+    r8.push_back(QString::fromLocal8Bit("天地否"));
+    r8.push_back(QString::fromLocal8Bit("泽地萃"));
+    r8.push_back(QString::fromLocal8Bit("火地晋"));
+    r8.push_back(QString::fromLocal8Bit("雷地豫"));
+    r8.push_back(QString::fromLocal8Bit("风地观"));
+    r8.push_back(QString::fromLocal8Bit("水地比"));
+    r8.push_back(QString::fromLocal8Bit("山地剥"));
+    r8.push_back(QString::fromLocal8Bit("坤为地"));
+    m_guaXiang.push_back(r8);
 }
 
 void BaGuaStock::LoadGua()
@@ -230,9 +322,11 @@ bool BaGuaStock::ParseHeaders(QString firtLine)
     ui.tableWidget->insertColumn(3);
     ui.tableWidget->insertColumn(4);
     ui.tableWidget->insertColumn(5);
+    ui.tableWidget->insertColumn(6);
 
     QStringList usefulheaders;
-    usefulheaders << QString::fromLocal8Bit("代码") << QString::fromLocal8Bit("名称")
+    usefulheaders << QString::fromLocal8Bit("卦象") 
+        << QString::fromLocal8Bit("代码") << QString::fromLocal8Bit("名称")
         << QString::fromLocal8Bit("涨幅%") << QString::fromLocal8Bit("现价")
         << QString::fromLocal8Bit("昨收") << QString::fromLocal8Bit("细分行业");
     ui.tableWidget->setHorizontalHeaderLabels(usefulheaders);
@@ -338,22 +432,25 @@ bool BaGuaStock::ParseLine(QString line)
                 ui.tableWidget->insertRow(ui.tableWidget->rowCount());
 
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
-                                        0, new QTableWidgetItem(data.value(m_codeCol)));
+                                        0, new QTableWidgetItem(m_guaXiang[keyRow][keyCol]));
 
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
-                                        1, new QTableWidgetItem(data.value(m_nameCol)));
+                                        1, new QTableWidgetItem(data.value(m_codeCol)));
 
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
-                                        2, new QTableWidgetItem(data.value(m_percentCol)));
+                                        2, new QTableWidgetItem(data.value(m_nameCol)));
 
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
-                                        3, new QTableWidgetItem(data.value(m_todayCol)));
+                                        3, new QTableWidgetItem(data.value(m_percentCol)));
 
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
-                                        4, new QTableWidgetItem(data.value(m_yesterdayCol)));
+                                        4, new QTableWidgetItem(data.value(m_todayCol)));
 
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
-                                        5, new QTableWidgetItem(data.value(m_domainCol)));
+                                        5, new QTableWidgetItem(data.value(m_yesterdayCol)));
+
+                ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
+                                        6, new QTableWidgetItem(data.value(m_domainCol)));
 
                 m_show++;
                 return true;
