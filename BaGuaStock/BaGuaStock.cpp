@@ -24,6 +24,12 @@ void BaGuaStock::resizeEvent(QResizeEvent *event)
         ui.tableWidget->setColumnWidth(c, ui.tableWidget->width() / columnCount);
     }
 
+    columnCount = ui.tableWidgetDomain->columnCount();
+    for (int c = 0; c < columnCount; c++)
+    {
+        ui.tableWidgetDomain->setColumnWidth(c, ui.tableWidgetDomain->width() / columnCount);
+    }
+
     QMainWindow::resizeEvent(event);
 }
 
@@ -263,6 +269,29 @@ void BaGuaStock::UpdateStats()
     ui.labelST->setText(QString::number(m_creation));
     ui.labelNoBuy->setText(QString::number(m_noBuy));
     ui.labelOther->setText(QString::number(m_other));
+
+    for (const auto& pair : m_domain_stats)
+    {
+        ui.tableWidgetDomain->insertRow(ui.tableWidgetDomain->rowCount());
+
+        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
+                                0, new QTableWidgetItem(pair.first));
+
+        int total = pair.second.m_show + pair.second.m_no_show;
+        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
+                                1, new QTableWidgetItem(QString::number(total)));
+
+        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
+                                2, new QTableWidgetItem(QString::number(pair.second.m_show)));
+
+        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
+                                3, new QTableWidgetItem(QString::number(pair.second.m_no_show)));
+
+        float percent = total > 0 ? ((float)pair.second.m_show / (float)total) : 0;
+        percent *= 100;
+        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
+                                4, new QTableWidgetItem(QString().setNum(percent, 'f', 2)));
+    }
 }
 
 void BaGuaStock::Clear()
@@ -282,10 +311,15 @@ void BaGuaStock::Clear()
     m_noBuy = 0;
     m_other = 0;
 
+    m_domain_stats.clear();
+
     UpdateStats();
 
     ui.tableWidget->setRowCount(0);
     ui.tableWidget->setColumnCount(0);
+
+    ui.tableWidgetDomain->setRowCount(0);
+    ui.tableWidgetDomain->setColumnCount(0);
 
     setWindowTitle(QApplication::applicationDisplayName());
 }
@@ -335,6 +369,26 @@ bool BaGuaStock::ParseHeaders(QString firtLine)
     for (int c = 0; c < columnCount; c++)
     {
         ui.tableWidget->setColumnWidth(c, ui.tableWidget->width() / columnCount);
+    }
+
+    ////////////////////////
+
+    ui.tableWidgetDomain->insertColumn(0);
+    ui.tableWidgetDomain->insertColumn(1);
+    ui.tableWidgetDomain->insertColumn(2);
+    ui.tableWidgetDomain->insertColumn(3);
+    ui.tableWidgetDomain->insertColumn(4);
+
+    QStringList domainheaders;
+    domainheaders << QString::fromLocal8Bit("细分行业")
+        << QString::fromLocal8Bit("总共") << QString::fromLocal8Bit("显示")
+        << QString::fromLocal8Bit("不显示") << QString::fromLocal8Bit("显示占比%");
+    ui.tableWidgetDomain->setHorizontalHeaderLabels(domainheaders);
+
+    columnCount = ui.tableWidgetDomain->columnCount();
+    for (int c = 0; c < columnCount; c++)
+    {
+        ui.tableWidgetDomain->setColumnWidth(c, ui.tableWidgetDomain->width() / columnCount);
     }
 
     return true;
@@ -424,6 +478,8 @@ bool BaGuaStock::ParseLine(QString line)
         int keyRow = FindGua(false, downGua);
         int keyCol = FindGua(true, topGua);
 
+        QString domain = data.value(m_domainCol);
+        DomainInfo& info = m_domain_stats[domain];
         if (keyRow < m_keys.size())
         {
             int key = m_keys[keyRow][keyCol];
@@ -453,11 +509,13 @@ bool BaGuaStock::ParseLine(QString line)
                                         6, new QTableWidgetItem(data.value(m_domainCol)));
 
                 m_show++;
+                info.m_show++;
                 return true;
             }
             else
             {
                 m_filter++;
+                info.m_no_show++;
                 return true;
             }
         }

@@ -19,6 +19,13 @@ private slots:
     void openFile();
 
 private:
+    struct DomainInfo
+    {
+        QString m_name;
+        int m_show = 0;
+        int m_no_show = 0;
+    };
+
     void LoadGuaXiang();
     void LoadGua();
     int FindGua(bool isTop, Gua gua);
@@ -46,6 +53,8 @@ private:
     int m_yesterdayCol = -1;
     int m_domainCol = -1;
 
+    std::map<QString, DomainInfo> m_domain_stats;
+    
     std::vector<std::vector<int>> m_keys;
     std::vector<std::vector<QString>> m_guaXiang;
     std::vector<Gua> m_topGua;
