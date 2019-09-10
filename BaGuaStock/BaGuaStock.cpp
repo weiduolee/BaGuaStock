@@ -14,6 +14,7 @@ BaGuaStock::BaGuaStock(QWidget *parent)
     LoadKeyFileData();
     LoadGua();
     LoadGuaXiang();
+    LoadDomainFilters();
 }
 
 void BaGuaStock::resizeEvent(QResizeEvent *event)
@@ -186,6 +187,32 @@ int BaGuaStock::FindGua(bool isTop, Gua gua)
     return -1;
 }
 
+bool BaGuaStock::LoadDomainFilters()
+{
+    QString filterFilPath = QApplication::applicationDirPath();
+    filterFilPath.append("/filter.txt");
+    QFile file(filterFilPath);
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("打开filter.txt文件失败"),
+                              QString::fromLocal8Bit("打开filter.txt文件失败！"));
+        return false;
+    }
+
+    QTextStream stream(&file);
+    QString line = stream.readLine();
+    line = line.trimmed();
+    while (!line.isEmpty())
+    {
+        m_domain_filters.push_back(line);
+
+        line = stream.readLine();
+        line = line.trimmed();
+    }
+
+    return true;
+}
+
 bool BaGuaStock::LoadKeyFileData()
 {
     QString keyFilPath = QApplication::applicationDirPath();
@@ -269,9 +296,16 @@ void BaGuaStock::UpdateStats()
     ui.labelST->setText(QString::number(m_creation));
     ui.labelNoBuy->setText(QString::number(m_noBuy));
     ui.labelOther->setText(QString::number(m_other));
-
+    
     for (const auto& pair : m_domain_stats)
     {
+        if (std::find(m_domain_filters.begin(), m_domain_filters.end(), pair.first) 
+            != m_domain_filters.end())
+        {
+            m_domain_filter++;
+            continue;
+        }
+
         ui.tableWidgetDomain->insertRow(ui.tableWidgetDomain->rowCount());
 
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
@@ -292,6 +326,8 @@ void BaGuaStock::UpdateStats()
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
                                 4, new QTableWidgetItem(QString().setNum(percent, 'f', 2)));
     }
+
+    ui.labelDomainFilter->setText(QString::number(m_domain_filter));
 }
 
 void BaGuaStock::Clear()
@@ -310,6 +346,7 @@ void BaGuaStock::Clear()
     m_creation;
     m_noBuy = 0;
     m_other = 0;
+    m_domain_filter = 0;
 
     m_domain_stats.clear();
 

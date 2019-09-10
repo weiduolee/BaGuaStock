@@ -29,6 +29,7 @@ private:
     void LoadGuaXiang();
     void LoadGua();
     int FindGua(bool isTop, Gua gua);
+    bool LoadDomainFilters();
     bool LoadKeyFileData();
     bool LoadFileData(QString filePath);
     void UpdateStats();
@@ -45,6 +46,7 @@ private:
     int m_creation = 0;
     int m_noBuy = 0;
     int m_other = 0;
+    int m_domain_filter = 0;
 
     int m_codeCol = -1;
     int m_nameCol = -1;
@@ -54,7 +56,8 @@ private:
     int m_domainCol = -1;
 
     std::map<QString, DomainInfo> m_domain_stats;
-    
+    std::vector<QString> m_domain_filters;
+
     std::vector<std::vector<int>> m_keys;
     std::vector<std::vector<QString>> m_guaXiang;
     std::vector<Gua> m_topGua;
