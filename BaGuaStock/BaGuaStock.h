@@ -17,13 +17,14 @@ public:
 
 private slots:
     void openFile();
+    void saveFile();
 
 private:
     struct DomainInfo
     {
         QString m_name;
-        int m_show = 0;
-        int m_no_show = 0;
+        int m_output= 0;
+        int m_no_output = 0;
     };
 
     void LoadGuaXiang();
@@ -39,15 +40,6 @@ private:
     
     Ui::BaGuaStockClass ui;
 
-    int m_total = 0;
-    int m_show = 0;
-    int m_filter = 0;
-    int m_ST = 0;
-    int m_creation = 0;
-    int m_noBuy = 0;
-    int m_other = 0;
-    int m_domain_filter = 0;
-
     int m_codeCol = -1;
     int m_nameCol = -1;
     int m_percentCol = -1;
@@ -55,9 +47,20 @@ private:
     int m_yesterdayCol = -1;
     int m_domainCol = -1;
 
-    std::map<QString, DomainInfo> m_domain_stats;
-    std::vector<QString> m_domain_filters;
+    int m_total = 0;
+    int m_output = 0;
+    int m_filter_file = 0;
+    int m_key_file = 0;
+    int m_ST = 0;
+    int m_creation = 0;
+    int m_noBuy = 0;
+    int m_other = 0;
 
+    std::vector<QString> m_outputs;
+    std::map<QString, DomainInfo> m_domain_stats;
+
+    // No change after app launch
+    std::vector<QString> m_domain_filters;
     std::vector<std::vector<int>> m_keys;
     std::vector<std::vector<QString>> m_guaXiang;
     std::vector<Gua> m_topGua;

@@ -10,11 +10,13 @@ BaGuaStock::BaGuaStock(QWidget *parent)
     ui.setupUi(this);
 
     connect(ui.pushButtonOpen, SIGNAL(clicked()), this, SLOT(openFile()));
+    connect(ui.pushButtonSave, SIGNAL(clicked()), this, SLOT(saveFile()));
 
     LoadKeyFileData();
     LoadGua();
     LoadGuaXiang();
     LoadDomainFilters();
+    Clear();
 }
 
 void BaGuaStock::resizeEvent(QResizeEvent *event)
@@ -46,6 +48,36 @@ void BaGuaStock::openFile()
     else
     {
         LoadFileData(filePath);
+    }
+}
+
+void BaGuaStock::saveFile()
+{
+    QString filePath = QFileDialog::getSaveFileName(this,
+                                                    QString::fromLocal8Bit("保存"), ".", QString::fromLocal8Bit("文本文件(*.txt)"));
+
+    if (filePath.isEmpty())
+    {
+        return;
+    }
+    else
+    {
+        QFile file(filePath);
+        if (file.open(QIODevice::ReadWrite))
+        {
+            QTextStream stream(&file);
+
+            for (QString line : m_outputs)
+            {
+                stream << line << endl;
+            }
+        }
+        else
+        {
+            QMessageBox::critical(this, QString::fromLocal8Bit("保存文件失败"),
+                                  QString::fromLocal8Bit("保存") + filePath + QString::fromLocal8Bit("文件失败！"));
+            return;
+        }
     }
 }
 
@@ -269,6 +301,8 @@ bool BaGuaStock::LoadFileData(QString filePath)
         return false;
     }
 
+    m_outputs.push_back(line);
+
     line = stream.readLine();
     while (!line.isEmpty())
     {
@@ -290,44 +324,45 @@ bool BaGuaStock::LoadFileData(QString filePath)
 void BaGuaStock::UpdateStats()
 {
     ui.labelTotal->setText(QString::number(m_total));
-    ui.labelShow->setText(QString::number(m_show));
-    ui.labelFilter->setText(QString::number(m_filter));
+    ui.labelOutput->setText(QString::number(m_output));
+    ui.labelFilterFile->setText(QString::number(m_filter_file));
+    ui.labelKeyFile->setText(QString::number(m_key_file));
     ui.labelST->setText(QString::number(m_ST));
-    ui.labelST->setText(QString::number(m_creation));
+    ui.labelCreation->setText(QString::number(m_creation));
     ui.labelNoBuy->setText(QString::number(m_noBuy));
     ui.labelOther->setText(QString::number(m_other));
     
     for (const auto& pair : m_domain_stats)
     {
-        if (std::find(m_domain_filters.begin(), m_domain_filters.end(), pair.first) 
-            != m_domain_filters.end())
-        {
-            m_domain_filter++;
-            continue;
-        }
-
         ui.tableWidgetDomain->insertRow(ui.tableWidgetDomain->rowCount());
 
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
                                 0, new QTableWidgetItem(pair.first));
 
-        int total = pair.second.m_show + pair.second.m_no_show;
+        int total = pair.second.m_output + pair.second.m_no_output;
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
                                 1, new QTableWidgetItem(QString::number(total)));
 
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                2, new QTableWidgetItem(QString::number(pair.second.m_show)));
+                                2, new QTableWidgetItem(QString::number(pair.second.m_output)));
 
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                3, new QTableWidgetItem(QString::number(pair.second.m_no_show)));
+                                3, new QTableWidgetItem(QString::number(pair.second.m_no_output)));
 
-        float percent = total > 0 ? ((float)pair.second.m_show / (float)total) : 0;
+        float percent = total > 0 ? ((float)pair.second.m_output/ (float)total) : 0;
         percent *= 100;
         ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
                                 4, new QTableWidgetItem(QString().setNum(percent, 'f', 2)));
     }
 
-    ui.labelDomainFilter->setText(QString::number(m_domain_filter));
+    if (m_outputs.size() <= 1)
+    {
+        ui.pushButtonSave->setDisabled(true);
+    }
+    else
+    {
+        ui.pushButtonSave->setDisabled(false);
+    }
 }
 
 void BaGuaStock::Clear()
@@ -340,14 +375,15 @@ void BaGuaStock::Clear()
     m_domainCol = -1;
 
     m_total = 0;
-    m_show = 0;
-    m_filter = 0;
+    m_output = 0;
+    m_filter_file = 0;
+    m_key_file = 0;
     m_ST = 0;
-    m_creation;
+    m_creation = 0;
     m_noBuy = 0;
     m_other = 0;
-    m_domain_filter = 0;
 
+    m_outputs.clear();
     m_domain_stats.clear();
 
     UpdateStats();
@@ -418,8 +454,8 @@ bool BaGuaStock::ParseHeaders(QString firtLine)
 
     QStringList domainheaders;
     domainheaders << QString::fromLocal8Bit("细分行业")
-        << QString::fromLocal8Bit("总共") << QString::fromLocal8Bit("显示")
-        << QString::fromLocal8Bit("不显示") << QString::fromLocal8Bit("显示占比%");
+        << QString::fromLocal8Bit("总共") << QString::fromLocal8Bit("输出")
+        << QString::fromLocal8Bit("不输出") << QString::fromLocal8Bit("输出占比%");
     ui.tableWidgetDomain->setHorizontalHeaderLabels(domainheaders);
 
     columnCount = ui.tableWidgetDomain->columnCount();
@@ -465,6 +501,14 @@ bool BaGuaStock::ParseLine(QString line)
         if (!ok)
         {
             m_noBuy++;
+            return true;
+        }
+
+        QString domain = data.value(m_domainCol);
+        if (std::find(m_domain_filters.begin(), m_domain_filters.end(), domain)
+            != m_domain_filters.end())
+        {
+            m_filter_file++;
             return true;
         }
 
@@ -515,10 +559,10 @@ bool BaGuaStock::ParseLine(QString line)
         int keyRow = FindGua(false, downGua);
         int keyCol = FindGua(true, topGua);
 
-        QString domain = data.value(m_domainCol);
-        DomainInfo& info = m_domain_stats[domain];
         if (keyRow < m_keys.size())
         {
+            DomainInfo& info = m_domain_stats[domain];
+
             int key = m_keys[keyRow][keyCol];
             if (key == 1)
             {
@@ -545,14 +589,16 @@ bool BaGuaStock::ParseLine(QString line)
                 ui.tableWidget->setItem(ui.tableWidget->rowCount() - 1,
                                         6, new QTableWidgetItem(data.value(m_domainCol)));
 
-                m_show++;
-                info.m_show++;
+                m_output++;
+                info.m_output++;
+
+                m_outputs.push_back(line);
                 return true;
             }
             else
             {
-                m_filter++;
-                info.m_no_show++;
+                m_key_file++;
+                info.m_no_output++;
                 return true;
             }
         }

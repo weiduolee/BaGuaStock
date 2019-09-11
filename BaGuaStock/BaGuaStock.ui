@@ -25,6 +25,13 @@
        </widget>
       </item>
       <item>
+       <widget class="QPushButton" name="pushButtonSave">
+        <property name="text">
+         <string>保存输出结果</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -61,68 +68,31 @@
         <string>显示统计</string>
        </property>
        <layout class="QGridLayout" name="gridLayout">
+        <item row="1" column="0" colspan="18">
+         <widget class="QTableWidget" name="tableWidgetDomain">
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="sortingEnabled">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="15">
+         <widget class="QLabel" name="labelOther">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="7">
+         <widget class="QLabel" name="labelKeyFile">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
         <item row="0" column="8">
-         <widget class="QLabel" name="label_7">
-          <property name="text">
-           <string>科创版：</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="2">
-         <widget class="QLabel" name="label_2">
-          <property name="text">
-           <string>显示：</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="5">
-         <widget class="QLabel" name="labelFilter">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="0">
-         <widget class="QLabel" name="label">
-          <property name="text">
-           <string>总共：</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="12">
-         <widget class="QLabel" name="label_6">
-          <property name="text">
-           <string>其他：</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="labelShow">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="11">
-         <widget class="QLabel" name="labelNoBuy">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="6">
          <widget class="QLabel" name="label_4">
           <property name="text">
            <string>ST：</string>
@@ -132,24 +102,10 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="13">
-         <widget class="QLabel" name="labelOther">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="9">
-         <widget class="QLabel" name="labelCreation">
-          <property name="text">
-           <string>0</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
+        <item row="0" column="6">
          <widget class="QLabel" name="label_3">
           <property name="text">
-           <string>计算过滤：</string>
+           <string>key文件过滤：</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -163,47 +119,98 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="10">
-         <widget class="QLabel" name="label_5">
-          <property name="text">
-           <string>今日无交易：</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="7">
-         <widget class="QLabel" name="labelST">
+        <item row="0" column="11">
+         <widget class="QLabel" name="labelCreation">
           <property name="text">
            <string>0</string>
           </property>
          </widget>
         </item>
-        <item row="0" column="15">
-         <widget class="QLabel" name="labelDomainFilter">
+        <item row="0" column="3">
+         <widget class="QLabel" name="labelOutput">
           <property name="text">
            <string>0</string>
           </property>
          </widget>
         </item>
         <item row="0" column="14">
-         <widget class="QLabel" name="label_8">
+         <widget class="QLabel" name="label_6">
           <property name="text">
-           <string>细分行业过滤：</string>
+           <string>其他：</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
-        <item row="1" column="0" colspan="16">
-         <widget class="QTableWidget" name="tableWidgetDomain">
-          <property name="editTriggers">
-           <set>QAbstractItemView::NoEditTriggers</set>
+        <item row="0" column="13">
+         <widget class="QLabel" name="labelNoBuy">
+          <property name="text">
+           <string>0</string>
           </property>
-          <property name="sortingEnabled">
-           <bool>true</bool>
+         </widget>
+        </item>
+        <item row="0" column="10">
+         <widget class="QLabel" name="label_7">
+          <property name="text">
+           <string>科创版：</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="9">
+         <widget class="QLabel" name="labelST">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="12">
+         <widget class="QLabel" name="label_5">
+          <property name="text">
+           <string>今昨无交易：</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="2">
+         <widget class="QLabel" name="label_2">
+          <property name="text">
+           <string>输出：</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="text">
+           <string>总共：</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="5">
+         <widget class="QLabel" name="labelFilterFile">
+          <property name="text">
+           <string>0</string>
+          </property>
+         </widget>
+        </item>
+        <item row="0" column="4">
+         <widget class="QLabel" name="label_8">
+          <property name="text">
+           <string>filter文件过滤：</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
         </item>
