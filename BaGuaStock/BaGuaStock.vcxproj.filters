@@ -36,14 +36,23 @@
     <ClCompile Include="BaGuaStock.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="FilterDialog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <QtMoc Include="BaGuaStock.h">
       <Filter>Header Files</Filter>
     </QtMoc>
+    <QtMoc Include="FilterDialog.h">
+      <Filter>Header Files</Filter>
+    </QtMoc>
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="BaGuaStock.ui">
+      <Filter>Form Files</Filter>
+    </QtUic>
+    <QtUic Include="FilterDialog.ui">
       <Filter>Form Files</Filter>
     </QtUic>
   </ItemGroup>
@@ -54,6 +63,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Gua.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FilterStruct.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
