@@ -106,11 +106,11 @@ void BaGuaStock::setFilter()
     dialog.SetFilterStruct(m_filter);
     if (dialog.exec() == QDialog::Accepted)
     {
-        if (m_filter == dialog.GetFilterStruct())
+        if (m_filter != dialog.GetFilterStruct())
         {
             m_filter = dialog.GetFilterStruct();
 
-            ClearStats();
+            ClearStats(true);
             ApplyFilter();
             UpdateStats();
         }
@@ -795,23 +795,26 @@ void BaGuaStock::ApplyFilter()
 
 void BaGuaStock::ClearAll()
 {
-    ClearStats();
+    ClearStats(false);
     ClearStockData();
 }
 
-void BaGuaStock::ClearStats()
+void BaGuaStock::ClearStats(bool keep_headers)
 {
     m_stats_info.Reset();
     UpdateStats();
 
     ui.tableWidgetConcept->setRowCount(0);
-    ui.tableWidgetConcept->setColumnCount(0);
+    if(!keep_headers)
+        ui.tableWidgetConcept->setColumnCount(0);
 
     ui.tableWidgetDomain->setRowCount(0);
-    ui.tableWidgetDomain->setColumnCount(0);
+    if (!keep_headers)
+        ui.tableWidgetDomain->setColumnCount(0);
 
     ui.tableWidgetOutput->setRowCount(0);
-    ui.tableWidgetOutput->setColumnCount(0);
+    if (!keep_headers)
+        ui.tableWidgetOutput->setColumnCount(0);
 
     setWindowTitle(QApplication::applicationDisplayName());
 }

@@ -14,4 +14,9 @@ struct FilterStruct
             && m_creative_filter == other.m_creative_filter
             && m_st_filter == other.m_st_filter;
     }
+
+    bool operator!=(const FilterStruct& other)
+    {
+        return !operator==(other);
+    }
 };

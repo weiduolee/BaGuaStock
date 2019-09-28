@@ -79,7 +79,7 @@ private:
     bool ParseHeaders(QString firtLine);
     
     void ClearAll();
-    void ClearStats();
+    void ClearStats(bool keep_headers);
     void ClearStockData();
 
     Ui::BaGuaStockClass ui;
