@@ -4,7 +4,7 @@
 #include <QMessageBox>
 #include <QTextStream>
 
-#include "FilterDialog.h"
+#include "NumberSortTableWidgetItem.h"
 
 BaGuaStock::BaGuaStock(QWidget *parent)
     : QMainWindow(parent)
@@ -13,8 +13,6 @@ BaGuaStock::BaGuaStock(QWidget *parent)
 
     connect(ui.pushButtonOpen, SIGNAL(clicked()), this, SLOT(openFile()));
     connect(ui.pushButtonSave, SIGNAL(clicked()), this, SLOT(saveFile()));
-    connect(ui.pushButtonFilter, SIGNAL(clicked()), this, SLOT(setFilter()));
-    connect(ui.tabWidget, SIGNAL(currentChanged(int)), this, SLOT(tabSelected()));
 
     LoadAllData();
     ClearAll();
@@ -22,23 +20,12 @@ BaGuaStock::BaGuaStock(QWidget *parent)
 
 void BaGuaStock::resizeEvent(QResizeEvent *event)
 {
-    int columnCount = ui.tableWidgetOutput->columnCount();
-    for(int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetOutput->setColumnWidth(c, ui.tableWidgetOutput->width() / columnCount);
-    }
-
-    columnCount = ui.tableWidgetConcept->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetConcept->setColumnWidth(c, ui.tableWidgetConcept->width() / columnCount);
-    }
-
-    columnCount = ui.tableWidgetDomain->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetDomain->setColumnWidth(c, ui.tableWidgetDomain->width() / columnCount);
-    }
+    int columnWidth = ui.tableWidgetConcept->width() / 10;
+    ui.tableWidgetConcept->setColumnWidth(0, columnWidth * 4);
+    ui.tableWidgetConcept->setColumnWidth(1, columnWidth * 1.5);
+    ui.tableWidgetConcept->setColumnWidth(2, columnWidth * 1.25);
+    ui.tableWidgetConcept->setColumnWidth(3, columnWidth * 1.25);
+    ui.tableWidgetConcept->setColumnWidth(4, columnWidth * 1.5);
 
     QMainWindow::resizeEvent(event);
 }
@@ -100,38 +87,6 @@ void BaGuaStock::saveFile()
     }
 }
 
-void BaGuaStock::setFilter()
-{
-    FilterDialog dialog(this);
-    dialog.SetFilterStruct(m_filter);
-    if (dialog.exec() == QDialog::Accepted)
-    {
-        if (m_filter != dialog.GetFilterStruct())
-        {
-            m_filter = dialog.GetFilterStruct();
-
-            ClearStats(true);
-            ApplyFilter();
-            UpdateStats();
-        }
-    }
-}
-
-void BaGuaStock::tabSelected()
-{
-    int columnCount = ui.tableWidgetOutput->columnCount();
-    columnCount = ui.tableWidgetConcept->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetConcept->setColumnWidth(c, ui.tableWidgetConcept->width() / columnCount);
-    }
-
-    columnCount = ui.tableWidgetDomain->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetDomain->setColumnWidth(c, ui.tableWidgetDomain->width() / columnCount);
-    }
-}
 
 void BaGuaStock::LoadAllData()
 {
@@ -139,8 +94,6 @@ void BaGuaStock::LoadAllData()
     LoadGua();
     LoadGuaXiang();
     LoadConceptClassFileData();
-    LoadConceptFilterFileData();
-    LoadDomainFilterFileData();
 }
 
 bool BaGuaStock::LoadKeyFilterFileData()
@@ -316,90 +269,43 @@ int BaGuaStock::FindGua(bool isTop, Gua gua)
 bool BaGuaStock::LoadConceptClassFileData()
 {
     QString filterFilPath = QApplication::applicationDirPath();
-    filterFilPath.append("/concept_class.csv");
+    filterFilPath.append("/concept_class.txt");
     QFile file(filterFilPath);
     if (!file.open(QFile::ReadOnly | QFile::Text))
     {
-        QMessageBox::critical(this, QString::fromLocal8Bit("打开concept_class.csv文件失败"),
-                              QString::fromLocal8Bit("打开concept_class.csv文件失败！"));
+        QMessageBox::critical(this, QString::fromLocal8Bit("打开concept_class.txt文件失败"),
+                              QString::fromLocal8Bit("打开concept_class.txt文件失败！"));
         return false;
     }
 
     QTextStream stream(&file);
-    stream.setCodec("UTF-8");
+    //stream.setCodec("UTF-8");
+    
     QString line = stream.readLine();
     line = line.trimmed();
     while (!line.isEmpty())
     {
-        QStringList data = line.split(",", QString::SkipEmptyParts);
+        QStringList data = line.split(" ", QString::SkipEmptyParts);
 
-        if (data.count() == 8)
+        if (data.count() == 3)
         {
-            QString code = data.value(2);
+            QString code = data.value(0);
             code = code.left(6);
             QRegExp re("^[0-9]{1,6}$"); 
             if (re.exactMatch(code))
             {
-                QString concept = data.value(6);
-                if (code.isEmpty() || concept.isEmpty())
+                QString concepts = data.value(2);
+                if (code.isEmpty() || concepts.isEmpty())
                     continue;
-
-                m_concept_stock_list[concept].push_back(code);
-                m_stock_concept_list[code].push_back(concept);
+                
+                QStringList concept_list = concepts.split(",", QString::SkipEmptyParts);
+                for (int i = 0; i < concept_list.count(); i++)
+                {
+                    m_concept_stock_list[concept_list.value(i)].push_back(code);
+                    m_stock_concept_list[code].push_back(concept_list.value(i));
+                }
             }
         }
-
-        line = stream.readLine();
-        line = line.trimmed();
-    }
-
-    return true;
-}
-
-bool BaGuaStock::LoadConceptFilterFileData()
-{
-    QString filterFilPath = QApplication::applicationDirPath();
-    filterFilPath.append("/concept_filter.txt");
-    QFile file(filterFilPath);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
-    {
-        QMessageBox::critical(this, QString::fromLocal8Bit("打开concept_filter.txt文件失败"),
-                              QString::fromLocal8Bit("打开concept_filter.txt文件失败！"));
-        return false;
-    }
-
-    QTextStream stream(&file);
-    QString line = stream.readLine();
-    line = line.trimmed();
-    while (!line.isEmpty())
-    {
-        m_concept_filter_list.push_back(line);
-
-        line = stream.readLine();
-        line = line.trimmed();
-    }
-
-    return true;
-}
-
-bool BaGuaStock::LoadDomainFilterFileData()
-{
-    QString filterFilPath = QApplication::applicationDirPath();
-    filterFilPath.append("/domain_filter.txt");
-    QFile file(filterFilPath);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
-    {
-        QMessageBox::critical(this, QString::fromLocal8Bit("打开domain_filter.txt文件失败"),
-                              QString::fromLocal8Bit("打开domain_filter.txt文件失败！"));
-        return false;
-    }
-
-    QTextStream stream(&file);
-    QString line = stream.readLine();
-    line = line.trimmed();
-    while (!line.isEmpty())
-    {
-        m_domain_filter_list.push_back(line);
 
         line = stream.readLine();
         line = line.trimmed();
@@ -451,9 +357,6 @@ void BaGuaStock::UpdateStats()
     ui.labelOutput->setText(QString::number(m_stats_info.m_output));
     ui.labelKeyFilter->setText(QString::number(m_stats_info.m_key_filter));
     ui.labelConceptFilter->setText(QString::number(m_stats_info.m_concept_filter));
-    ui.labelDomainFilter->setText(QString::number(m_stats_info.m_domain_filter));
-    ui.labelCreativeFilter->setText(QString::number(m_stats_info.m_creative_filter));
-    ui.labelStFilter->setText(QString::number(m_stats_info.m_st_filter));
     ui.labelExchangeFilter->setText(QString::number(m_stats_info.m_exchange_filter));
     ui.labelOther->setText(QString::number(m_stats_info.m_other));
 
@@ -462,45 +365,22 @@ void BaGuaStock::UpdateStats()
         ui.tableWidgetConcept->insertRow(ui.tableWidgetConcept->rowCount());
 
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
-                                      0, new QTableWidgetItem(pair.first));
+                                      0, new NumberSortTableWidgetItem(pair.first));
 
         int total = pair.second.m_output + pair.second.m_filtered;
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
-                                      1, new QTableWidgetItem(QString::number(total)));
+                                      1, new NumberSortTableWidgetItem(QString::number(total)));
 
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
-                                      2, new QTableWidgetItem(QString::number(pair.second.m_output)));
+                                      2, new NumberSortTableWidgetItem(QString::number(pair.second.m_output)));
 
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
-                                      3, new QTableWidgetItem(QString::number(pair.second.m_filtered)));
+                                      3, new NumberSortTableWidgetItem(QString::number(pair.second.m_filtered)));
 
         float percent = total > 0 ? ((float)pair.second.m_output / (float)total) : 0;
         percent *= 100;
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
-                                      4, new QTableWidgetItem(QString().setNum(percent, 'f', 2)));
-    }
-
-    for (const auto& pair : m_stats_info.m_domain_stats)
-    {
-        ui.tableWidgetDomain->insertRow(ui.tableWidgetDomain->rowCount());
-
-        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                0, new QTableWidgetItem(pair.first));
-
-        int total = pair.second.m_output + pair.second.m_filtered;
-        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                1, new QTableWidgetItem(QString::number(total)));
-
-        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                2, new QTableWidgetItem(QString::number(pair.second.m_output)));
-
-        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                3, new QTableWidgetItem(QString::number(pair.second.m_filtered)));
-
-        float percent = total > 0 ? ((float)pair.second.m_output/ (float)total) : 0;
-        percent *= 100;
-        ui.tableWidgetDomain->setItem(ui.tableWidgetDomain->rowCount() - 1,
-                                4, new QTableWidgetItem(QString().setNum(percent, 'f', 2)));
+                                      4, new NumberSortTableWidgetItem(QString().setNum(percent, 'f', 2)));
     }
 
     if (m_output_index_list.size() <= 1)
@@ -556,11 +436,7 @@ bool BaGuaStock::ParseHeaders(QString firtLine)
         << QString::fromLocal8Bit("概念");
     ui.tableWidgetOutput->setHorizontalHeaderLabels(usefulheaders);
 
-    int columnCount = ui.tableWidgetOutput->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetOutput->setColumnWidth(c, ui.tableWidgetOutput->width() / columnCount);
-    }
+    ui.tableWidgetOutput->horizontalHeader()->setStretchLastSection(true);
 
     ////////////////////////
 
@@ -576,32 +452,12 @@ bool BaGuaStock::ParseHeaders(QString firtLine)
         << QString::fromLocal8Bit("不输出") << QString::fromLocal8Bit("输出占比%");
     ui.tableWidgetConcept->setHorizontalHeaderLabels(concept_headers);
 
-    columnCount = ui.tableWidgetConcept->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetConcept->setColumnWidth(c, ui.tableWidgetConcept->width() / columnCount);
-    }
-
-    ////////////////////////
-
-    ui.tableWidgetDomain->insertColumn(0);
-    ui.tableWidgetDomain->insertColumn(1);
-    ui.tableWidgetDomain->insertColumn(2);
-    ui.tableWidgetDomain->insertColumn(3);
-    ui.tableWidgetDomain->insertColumn(4);
-
-    QStringList domainheaders;
-    domainheaders << QString::fromLocal8Bit("细分行业")
-        << QString::fromLocal8Bit("总共") << QString::fromLocal8Bit("输出")
-        << QString::fromLocal8Bit("不输出") << QString::fromLocal8Bit("输出占比%");
-    ui.tableWidgetDomain->setHorizontalHeaderLabels(domainheaders);
-
-    columnCount = ui.tableWidgetDomain->columnCount();
-    for (int c = 0; c < columnCount; c++)
-    {
-        ui.tableWidgetDomain->setColumnWidth(c, ui.tableWidgetDomain->width() / columnCount);
-    }
-
+    int columnWidth = ui.tableWidgetConcept->width() / 10;
+    ui.tableWidgetConcept->setColumnWidth(0, columnWidth * 4);
+    ui.tableWidgetConcept->setColumnWidth(1, columnWidth * 1.5);
+    ui.tableWidgetConcept->setColumnWidth(2, columnWidth * 1.25);
+    ui.tableWidgetConcept->setColumnWidth(3, columnWidth * 1.25);
+    ui.tableWidgetConcept->setColumnWidth(4, columnWidth * 1.5);
 
     return true;
 }
@@ -618,21 +474,10 @@ void BaGuaStock::ApplyFilter()
         if (data.count() > 6)
         {
             QString code = data.value(m_codeCol);
-            if (m_filter.m_creative_filter && code.startsWith("688", Qt::CaseInsensitive))
-            {
-                m_stats_info.m_creative_filter++;
-                continue;
-            }
-
             QString name = data.value(m_nameCol);
-            if (m_filter.m_st_filter && name.contains("ST", Qt::CaseInsensitive))
-            {
-                m_stats_info.m_st_filter++;
-                continue;
-            }
-
             QString today = data.value(m_todayCol);
             QString yestoday = data.value(m_yesterdayCol);
+            QString domain = data.value(m_domainCol);
 
             bool ok = false;
             double todayValue = today.toDouble(&ok);
@@ -648,34 +493,15 @@ void BaGuaStock::ApplyFilter()
                 continue;
             }
 
-            QString domain = data.value(m_domainCol);
-            if (std::find(m_domain_filter_list.begin(), m_domain_filter_list.end(), domain)
-                != m_domain_filter_list.end())
-            {
-                m_stats_info.m_domain_filter++;
-                continue;
-            }
-
             std::vector<QString> concepts;
             if (m_stock_concept_list.count(code) > 0)
             {
                 concepts = m_stock_concept_list[code];
-                bool all_hits = true;
-                for (const QString concept : concepts)
-                {
-                    if (std::find(m_concept_filter_list.begin(), m_concept_filter_list.end(), concept)
-                        == m_concept_filter_list.end())
-                    {
-                        all_hits = false;
-                        break;
-                    }
-                }
-
-                if (all_hits)
-                {
-                    m_stats_info.m_concept_filter++;
-                    continue;
-                }
+            }
+            else
+            {
+                m_stats_info.m_concept_filter++;
+                continue;
             }
 
             int sumToday = 0;
@@ -733,32 +559,31 @@ void BaGuaStock::ApplyFilter()
                     ui.tableWidgetOutput->insertRow(ui.tableWidgetOutput->rowCount());
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            0, new QTableWidgetItem(m_gua_xiang[keyRow][keyCol]));
+                                            0, new NumberSortTableWidgetItem(m_gua_xiang[keyRow][keyCol]));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            1, new QTableWidgetItem(data.value(m_codeCol)));
+                                            1, new NumberSortTableWidgetItem(data.value(m_codeCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            2, new QTableWidgetItem(data.value(m_nameCol)));
+                                            2, new NumberSortTableWidgetItem(data.value(m_nameCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            3, new QTableWidgetItem(data.value(m_percentCol)));
+                                            3, new NumberSortTableWidgetItem(data.value(m_percentCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            4, new QTableWidgetItem(data.value(m_todayCol)));
+                                            4, new NumberSortTableWidgetItem(data.value(m_todayCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            5, new QTableWidgetItem(data.value(m_yesterdayCol)));
+                                            5, new NumberSortTableWidgetItem(data.value(m_yesterdayCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            6, new QTableWidgetItem(data.value(m_domainCol)));
+                                            6, new NumberSortTableWidgetItem(data.value(m_domainCol)));
 
                     QStringList all_concepts(QVector<QString>::fromStdVector(concepts).toList());
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            7, new QTableWidgetItem(all_concepts.join(',')));
+                                            7, new NumberSortTableWidgetItem(all_concepts.join(',')));
 
                     m_stats_info.m_output++;
-                    m_stats_info.m_domain_stats[domain].m_output++;
                     for (const QString concept : concepts)
                     {
                         m_stats_info.m_concept_stats[concept].m_output++;
@@ -770,7 +595,6 @@ void BaGuaStock::ApplyFilter()
                 else
                 {
                     m_stats_info.m_key_filter++;
-                    m_stats_info.m_domain_stats[domain].m_filtered++;
                     for (const QString concept : concepts)
                     {
                         m_stats_info.m_concept_stats[concept].m_filtered++;
@@ -807,10 +631,6 @@ void BaGuaStock::ClearStats(bool keep_headers)
     ui.tableWidgetConcept->setRowCount(0);
     if(!keep_headers)
         ui.tableWidgetConcept->setColumnCount(0);
-
-    ui.tableWidgetDomain->setRowCount(0);
-    if (!keep_headers)
-        ui.tableWidgetDomain->setColumnCount(0);
 
     ui.tableWidgetOutput->setRowCount(0);
     if (!keep_headers)

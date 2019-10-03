@@ -3,7 +3,6 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_BaGuaStock.h"
 #include "Gua.h"
-#include "FilterStruct.h"
 
 #include <vector>
 
@@ -19,8 +18,6 @@ public:
 private slots:
     void openFile();
     void saveFile();
-    void setFilter();
-    void tabSelected();
 
 private:
     struct DetailStats
@@ -36,14 +33,10 @@ private:
         int m_output = 0;
         int m_key_filter = 0;
         int m_concept_filter = 0;
-        int m_domain_filter = 0;
-        int m_creative_filter = 0;
-        int m_st_filter = 0;
         int m_exchange_filter = 0;
         int m_other = 0;
 
         std::map<QString, DetailStats> m_concept_stats;
-        std::map<QString, DetailStats> m_domain_stats;
 
         void Reset()
         {
@@ -51,14 +44,10 @@ private:
             m_output = 0;
             m_key_filter = 0;
             m_concept_filter = 0;
-            m_domain_filter = 0;
-            m_creative_filter = 0;
-            m_st_filter = 0;
             m_exchange_filter = 0;
             m_other = 0;
 
             m_concept_stats.clear();
-            m_domain_stats.clear();
         }
     };
 
@@ -72,8 +61,6 @@ private:
     
     bool LoadKeyFilterFileData();
     bool LoadConceptClassFileData();
-    bool LoadConceptFilterFileData();
-    bool LoadDomainFilterFileData();
 
     bool LoadStockFileData(QString filePath);
     bool ParseHeaders(QString firtLine);
@@ -83,8 +70,6 @@ private:
     void ClearStockData();
 
     Ui::BaGuaStockClass ui;
-
-    FilterStruct m_filter;
 
     StatsInfo m_stats_info;
 
@@ -101,8 +86,6 @@ private:
     // No change after app launch
     std::map<QString, std::vector<QString>> m_concept_stock_list;
     std::map<QString, std::vector<QString>> m_stock_concept_list;
-    std::vector<QString> m_concept_filter_list;
-    std::vector<QString> m_domain_filter_list;
     std::vector<std::vector<int>> m_keys;
     std::vector<std::vector<QString>> m_gua_xiang;
     std::vector<Gua> m_top_gua;

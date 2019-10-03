@@ -114,7 +114,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="BaGuaStock.cpp" />
-    <ClCompile Include="FilterDialog.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -122,18 +121,13 @@
   </ItemGroup>
   <ItemGroup>
     <QtUic Include="BaGuaStock.ui" />
-    <QtUic Include="FilterDialog.ui" />
   </ItemGroup>
   <ItemGroup>
     <QtRcc Include="BaGuaStock.qrc" />
   </ItemGroup>
   <ItemGroup>
-    <QtMoc Include="FilterDialog.h">
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
-      <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles;.;$(QTDIR)\include;.\GeneratedFiles\$(ConfigurationName);$(QTDIR)\include\QtCore;$(QTDIR)\include\QtGui;$(QTDIR)\include\QtANGLE;$(QTDIR)\include\QtWidgets</IncludePath>
-    </QtMoc>
-    <ClInclude Include="FilterStruct.h" />
     <ClInclude Include="Gua.h" />
+    <ClInclude Include="NumberSortTableWidgetItem.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Condition="Exists('$(QtMsBuild)\qt.targets')">
