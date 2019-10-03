@@ -365,7 +365,7 @@ void BaGuaStock::UpdateStats()
         ui.tableWidgetConcept->insertRow(ui.tableWidgetConcept->rowCount());
 
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
-                                      0, new NumberSortTableWidgetItem(pair.first));
+                                      0, new QTableWidgetItem(pair.first));
 
         int total = pair.second.m_output + pair.second.m_filtered;
         ui.tableWidgetConcept->setItem(ui.tableWidgetConcept->rowCount() - 1,
@@ -559,13 +559,13 @@ void BaGuaStock::ApplyFilter()
                     ui.tableWidgetOutput->insertRow(ui.tableWidgetOutput->rowCount());
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            0, new NumberSortTableWidgetItem(m_gua_xiang[keyRow][keyCol]));
+                                            0, new QTableWidgetItem(m_gua_xiang[keyRow][keyCol]));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            1, new NumberSortTableWidgetItem(data.value(m_codeCol)));
+                                            1, new QTableWidgetItem(data.value(m_codeCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            2, new NumberSortTableWidgetItem(data.value(m_nameCol)));
+                                            2, new QTableWidgetItem(data.value(m_nameCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
                                             3, new NumberSortTableWidgetItem(data.value(m_percentCol)));
@@ -577,11 +577,11 @@ void BaGuaStock::ApplyFilter()
                                             5, new NumberSortTableWidgetItem(data.value(m_yesterdayCol)));
 
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            6, new NumberSortTableWidgetItem(data.value(m_domainCol)));
+                                            6, new QTableWidgetItem(data.value(m_domainCol)));
 
                     QStringList all_concepts(QVector<QString>::fromStdVector(concepts).toList());
                     ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
-                                            7, new NumberSortTableWidgetItem(all_concepts.join(',')));
+                                            7, new QTableWidgetItem(all_concepts.join(',')));
 
                     m_stats_info.m_output++;
                     for (const QString concept : concepts)
