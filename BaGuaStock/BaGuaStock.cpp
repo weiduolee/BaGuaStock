@@ -287,22 +287,29 @@ bool BaGuaStock::LoadConceptClassFileData()
     {
         QStringList data = line.split(" ", QString::SkipEmptyParts);
 
-        if (data.count() == 3)
+        if (data.count() > 0)
         {
             QString code = data.value(0);
             code = code.left(6);
             QRegExp re("^[0-9]{1,6}$"); 
             if (re.exactMatch(code))
             {
-                QString concepts = data.value(2);
-                if (code.isEmpty() || concepts.isEmpty())
+                if (code.isEmpty())
                     continue;
-                
-                QStringList concept_list = concepts.split(",", QString::SkipEmptyParts);
-                for (int i = 0; i < concept_list.count(); i++)
+             
+                if (data.count() > 2)
                 {
-                    m_concept_stock_list[concept_list.value(i)].push_back(code);
-                    m_stock_concept_list[code].push_back(concept_list.value(i));
+                    QString concepts = data.value(2);
+                    QStringList concept_list = concepts.split(",", QString::SkipEmptyParts);
+                    for (int i = 0; i < concept_list.count(); i++)
+                    {
+                        m_concept_stock_list[concept_list.value(i)].push_back(code);
+                        m_stock_concept_list[code].push_back(concept_list.value(i));
+                    }
+                }
+                else
+                {
+                    m_stock_concept_list[code];
                 }
             }
         }
