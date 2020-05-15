@@ -420,8 +420,10 @@ bool BaGuaStock::ParseHeaders(QString firtLine)
             m_domainCol = c;
     }
 
-    if (m_codeCol < 0 || m_nameCol < 0 || m_percentCol < 0 || m_todayCol < 0 
-        || m_yesterdayCol < 0 || m_domainCol < 0)
+    /*if (m_codeCol < 0 || m_nameCol < 0 || m_percentCol < 0 || m_todayCol < 0 
+        || m_yesterdayCol < 0 || m_domainCol < 0)*/
+    if (m_codeCol < 0 || m_nameCol < 0 || m_todayCol < 0
+        || m_yesterdayCol < 0)
     {
         return false;
     }
