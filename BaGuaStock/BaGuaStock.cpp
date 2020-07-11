@@ -12,6 +12,7 @@ BaGuaStock::BaGuaStock(QWidget *parent)
     ui.setupUi(this);
 
     connect(ui.pushButtonOpen, SIGNAL(clicked()), this, SLOT(openFile()));
+    connect(ui.pushButtonOpen2, SIGNAL(clicked()), this, SLOT(openFile2()));
     connect(ui.pushButtonSave, SIGNAL(clicked()), this, SLOT(saveFile()));
 
     LoadAllData();
@@ -49,8 +50,52 @@ void BaGuaStock::openFile()
         
         UpdateStats();
         
-        QMessageBox::information(this, QString::fromLocal8Bit("数据处理完成"),
-                                 QString::fromLocal8Bit("数据处理完成！"));
+        QMessageBox::information(this, QString::fromLocal8Bit("当日数据处理完成"),
+                                 QString::fromLocal8Bit("当日数据处理完成！"));
+    }
+}
+
+void BaGuaStock::openFile2()
+{
+    QString filePath = QFileDialog::getOpenFileName(this,
+        QString::fromLocal8Bit("打开第一日数据"), ".", QString::fromLocal8Bit("通达信导出数据文件(*.txt)"));
+
+    if (filePath.isEmpty())
+    {
+        return;
+    }
+    else
+    {
+        QString filePath2 = QFileDialog::getOpenFileName(this,
+            QString::fromLocal8Bit("打开第二日数据"), ".", QString::fromLocal8Bit("通达信导出数据文件(*.txt)"));
+
+        if (filePath2.isEmpty())
+            return;
+
+        if (filePath == filePath2)
+        {
+            QMessageBox::information(this, QString::fromLocal8Bit("两日数据处理失败"),
+                QString::fromLocal8Bit("两日数据文件是同一个文件！"));
+            return;
+        }
+
+        ClearAll();
+
+        LoadStockFileData2(filePath, filePath2);
+
+        ApplyFilter2();
+
+        if (m_output_index_list.size() < 1)
+        {
+            ui.pushButtonSave->setDisabled(true);
+        }
+        else
+        {
+            ui.pushButtonSave->setDisabled(false);
+        }
+
+        QMessageBox::information(this, QString::fromLocal8Bit("两日数据处理完成"),
+            QString::fromLocal8Bit("两日数据处理完成！"));
     }
 }
 
@@ -75,7 +120,7 @@ void BaGuaStock::saveFile()
             for (int index : m_output_index_list)
             {
                 if(index >= 0 && index < m_stock_data.size())
-                stream << m_stock_data[index] << endl;
+                    stream << m_stock_data[index] << endl;
             }
         }
         else
@@ -390,7 +435,7 @@ void BaGuaStock::UpdateStats()
                                       4, new NumberSortTableWidgetItem(QString().setNum(percent, 'f', 2)));
     }
 
-    if (m_output_index_list.size() <= 1)
+    if (m_output_index_list.size() < 1)
     {
         ui.pushButtonSave->setDisabled(true);
     }
@@ -626,6 +671,240 @@ void BaGuaStock::ApplyFilter()
     }
 }
 
+bool BaGuaStock::LoadStockFileData2(QString filePath, QString filePath2)
+{
+    QFile file(filePath);
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("加载数据失败"),
+            QString::fromLocal8Bit("打开第一日数据文件失败！"));
+        return false;
+    }
+
+    QFile file2(filePath2);
+    if (!file2.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("加载数据失败"),
+            QString::fromLocal8Bit("打开第二日数据文件失败！"));
+        return false;
+    }
+
+    setWindowTitle(QApplication::applicationDisplayName() + " - " + filePath);
+
+    QTextStream stream(&file);
+    QString line = stream.readLine();
+
+    if (!ParseHeaders2(line))
+    {
+        QMessageBox::critical(this, QString::fromLocal8Bit("加载数据失败"),
+            QString::fromLocal8Bit("第一日数据文件中没有符合的列名！"));
+        return false;
+    }
+
+    m_stock_data.push_back(line);
+
+    line = stream.readLine();
+    while (!line.isEmpty())
+    {
+        m_stock_data.push_back(line);
+
+        line = stream.readLine();
+    }
+
+    // Day2 data
+    QTextStream stream2(&file2);
+    line = stream2.readLine();
+    while (!line.isEmpty())
+    {
+        QStringList data = line.split("\t", QString::SkipEmptyParts);
+        if (data.count() > 6)
+        {
+            QString code = data.value(m_codeCol);
+            if (code.isEmpty())
+            {
+                line = stream2.readLine();
+                continue;
+            }
+
+            QString today = data.value(m_todayCol);
+
+            bool ok = false;
+            double todayValue = today.toDouble(&ok);
+            if (!ok)
+            {
+                line = stream2.readLine();
+                continue;
+            }
+
+            m_stock_data2[code] = today;
+        }
+
+        line = stream2.readLine();
+    }
+
+    return true;
+}
+
+bool BaGuaStock::ParseHeaders2(QString firtLine)
+{
+    // 代码 名称 现价
+    QStringList headers = firtLine.split("\t", QString::SkipEmptyParts);
+    for (int c = 0; c < headers.count(); c++)
+    {
+        if (headers.value(c) == QString::fromLocal8Bit("代码"))
+            m_codeCol = c;
+        else if (headers.value(c) == QString::fromLocal8Bit("名称"))
+            m_nameCol = c;
+        else if (headers.value(c) == QString::fromLocal8Bit("现价"))
+            m_todayCol = c;
+    }
+
+    if (m_codeCol < 0 || m_nameCol < 0 || m_todayCol < 0)
+    {
+        return false;
+    }
+
+    ui.tableWidgetOutput->insertColumn(0);
+    ui.tableWidgetOutput->insertColumn(1);
+    ui.tableWidgetOutput->insertColumn(2);
+    ui.tableWidgetOutput->insertColumn(3);
+    ui.tableWidgetOutput->insertColumn(4);
+
+    QStringList usefulheaders;
+    usefulheaders << QString::fromLocal8Bit("卦象")
+        << QString::fromLocal8Bit("代码") << QString::fromLocal8Bit("名称")
+        << QString::fromLocal8Bit("第一日现价") << QString::fromLocal8Bit("第二日现价");
+    ui.tableWidgetOutput->setHorizontalHeaderLabels(usefulheaders);
+
+    ui.tableWidgetOutput->horizontalHeader()->setStretchLastSection(true);
+
+    return true;
+}
+
+void BaGuaStock::ApplyFilter2()
+{
+    int line_index = 0;
+    for (const QString& line : m_stock_data)
+    {
+        line_index++;
+
+        QStringList data = line.split("\t", QString::SkipEmptyParts);
+
+        if (data.count() > 6)
+        {
+            QString code = data.value(m_codeCol);
+            QString name = data.value(m_nameCol);
+            QString day1 = data.value(m_todayCol);
+
+            bool ok = false;
+            double day1Value = day1.toDouble(&ok);
+            if (!ok)
+                continue;
+
+            std::vector<QString> concepts;
+            if (m_stock_concept_list.count(code) > 0)
+            {
+                concepts = m_stock_concept_list[code];
+            }
+            else
+            {
+                continue;
+            }
+
+            if (m_stock_data2.count(code) == 0)
+                continue;
+
+            QString day2 = m_stock_data2[code];
+
+            int sumToday = 0;
+            for (int i = 0; i < day2.length(); i++)
+            {
+                if (day2[i] == '.')
+                    continue;
+
+                int value = QString(day2[i]).toInt();
+                sumToday += value;
+            }
+
+            int sumYesterday = 0;
+            for (int i = 0; i < day1.length(); i++)
+            {
+                if (day1[i] == '.')
+                    continue;
+
+                int value = QString(day1[i]).toInt();
+                sumYesterday += value;
+            }
+
+            int top = sumYesterday % 8;
+            if (top == 0)
+                top = 8;
+
+            int down = sumToday % 8;
+            if (down == 0)
+                down = 8;
+
+            Gua topGua = m_top_gua[top - 1];
+            Gua downGua = m_down_gua[down - 1];
+
+            int var = (sumYesterday + sumToday) % 6;
+            if (var == 0)
+                var = 6;
+
+            if (var > 0 && var < 4)
+            {
+                downGua.SetRow((3 - var), abs(downGua.Rows()[3 - var] - 1));
+            }
+            else
+            {
+                topGua.SetRow((6 - var), abs(topGua.Rows()[6 - var] - 1));
+            }
+
+            int keyRow = FindGua(false, downGua);
+            int keyCol = FindGua(true, topGua);
+
+            if (keyRow < m_keys.size())
+            {
+                int key = m_keys[keyRow][keyCol];
+                if (key == 1)
+                {
+                    ui.tableWidgetOutput->insertRow(ui.tableWidgetOutput->rowCount());
+
+                    ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
+                        0, new QTableWidgetItem(m_gua_xiang[keyRow][keyCol]));
+
+                    ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
+                        1, new QTableWidgetItem(data.value(m_codeCol)));
+
+                    ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
+                        2, new QTableWidgetItem(data.value(m_nameCol)));
+
+                    ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
+                        3, new NumberSortTableWidgetItem(day1));
+
+                    ui.tableWidgetOutput->setItem(ui.tableWidgetOutput->rowCount() - 1,
+                        4, new NumberSortTableWidgetItem(day2));
+
+                    m_output_index_list.push_back(line_index - 1);
+                    continue;
+                }
+                else
+                {
+                    continue;
+                }
+            }
+            else
+            {
+                continue;
+            }
+        }
+        else
+        {
+            continue;
+        }
+    }
+}
+
 void BaGuaStock::ClearAll()
 {
     ClearStats(false);
@@ -658,5 +937,6 @@ void BaGuaStock::ClearStockData()
     m_domainCol = -1;
 
     m_stock_data.clear();
+    m_stock_data2.clear();
     m_output_index_list.clear();
 }

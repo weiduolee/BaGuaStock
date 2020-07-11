@@ -17,6 +17,7 @@ public:
 
 private slots:
     void openFile();
+    void openFile2();
     void saveFile();
 
 private:
@@ -64,6 +65,10 @@ private:
 
     bool LoadStockFileData(QString filePath);
     bool ParseHeaders(QString firtLine);
+
+    bool LoadStockFileData2(QString filePath, QString filePath2);
+    bool ParseHeaders2(QString firtLine);
+    void ApplyFilter2();
     
     void ClearAll();
     void ClearStats(bool keep_headers);
@@ -81,6 +86,7 @@ private:
     int m_domainCol = -1;
 
     std::vector<QString> m_stock_data;
+    std::map<QString, QString> m_stock_data2;
     std::vector<int> m_output_index_list;
 
     // No change after app launch

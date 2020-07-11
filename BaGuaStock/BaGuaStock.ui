@@ -184,7 +184,14 @@
       <item>
        <widget class="QPushButton" name="pushButtonOpen">
         <property name="text">
-         <string> 打开文件</string>
+         <string> 打开文件(当日数据)</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pushButtonOpen2">
+        <property name="text">
+         <string>打开文件(两日数据)</string>
         </property>
        </widget>
       </item>
